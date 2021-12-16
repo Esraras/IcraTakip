@@ -1,0 +1,26 @@
+logging:
+  level:
+    org.springframework.web: debug
+    org.springframework.security: warn
+    org.hibernate.SQL: warn # debug to print SQL statements
+    org.hibernate.type.descriptor.sql.BasicBinder: warn # trace to print SQL query parameters
+
+spring:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:~/icraTakip
+    username: sa
+    password:
+
+vaadin:
+  urlMapping: /*
+
+#linkki configuration
+theme: icra
