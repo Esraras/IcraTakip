@@ -1,5 +1,6 @@
 package com.esra.kgm.ui;
 
+import com.esra.kgm.entity.EntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.esra.kgm.KgmApplicationInfo;
@@ -18,9 +19,9 @@ public class EmployeeView extends VerticalLayout {
     private static final long serialVersionUID = 1L;
 
     @Autowired
-    public EmployeeView(EmployeeRepository employeeRepository) {
+    public EmployeeView(EmployeeRepository employeeRepository, EntryRepository entryRepository) {
         setSizeFull();
-        EmployeePage employeePage = new EmployeePage(employeeRepository);
+        EmployeePage employeePage = new EmployeePage(employeeRepository, entryRepository);
         employeePage.init();
         add(employeePage);
     }

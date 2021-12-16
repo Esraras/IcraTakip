@@ -24,7 +24,7 @@
 
 		<start-class>com.esra.kgm.KgmApplication</start-class>
 
-		<linkki.version>1.5.0-rc01</linkki.version>
+		<linkki.version>1.5.0</linkki.version>
 		<vaadin.version>14.7.1</vaadin.version>
 	</properties>
 

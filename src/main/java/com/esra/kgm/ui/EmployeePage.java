@@ -1,8 +1,10 @@
 package com.esra.kgm.ui;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 
+import com.esra.kgm.entity.Entry;
+import com.esra.kgm.entity.EntryRepository;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import org.linkki.core.binding.manager.BindingManager;
 import org.linkki.core.binding.manager.DefaultBindingManager;
 import org.linkki.core.binding.validation.ValidationService;
@@ -20,12 +22,14 @@ public class EmployeePage extends AbstractPage {
     private static final long serialVersionUID = 1L;
 
     private final BindingManager bindingManager = new DefaultBindingManager(ValidationService.NOP_VALIDATION_SERVICE);
-    private final EmployeeRepository employeeRepository;
+    private EmployeeRepository employeeRepository;
+    private final EntryRepository entryRepository;
 
     private SearchSectionPmo searchSectionPmo;
 
-    public EmployeePage(EmployeeRepository employeeRepository) {
+    public EmployeePage(EmployeeRepository employeeRepository, EntryRepository entryRepository) {
         this.employeeRepository = employeeRepository;
+        this.entryRepository = entryRepository;
     }
 
     @Override
@@ -36,31 +40,55 @@ public class EmployeePage extends AbstractPage {
         heading.setSizeFull();
         heading.addClassName(KgmStyles.HEADING);
         add(heading);
-        searchSectionPmo = new SearchSectionPmo(this::search);
+        searchSectionPmo = new SearchSectionPmo(this::saveEmployee, this::search);
         add(getPmoBasedSectionFactory().createSection(searchSectionPmo, getBindingManager().getContext("Context 1")));
     }
 
-    private void search() {
-        Notification.show("Arıyor…​", 1000, Notification.Position.MIDDLE);
 
-        Iterable<Employee> searchResult = employeeRepository.findAll();
+
+    private void search(Employee search) {
+        //Notification.show("Arıyor…​", 1000, Notification.Position.MIDDLE);
+
+        Optional<Employee> searchResult = employeeRepository.findByRegistration(search.getRegistration());
 
         removeAll();
         createContent();
         add(ComponentFactory.newHorizontalLine());
 
-        List<Employee> result = new ArrayList<Employee>();
-        searchResult.forEach(result::add);
-        addSearchResultSection(result);
+        if(searchResult.isPresent()){
+            addSearchResultSection(searchResult.get());
+        } else  {
+            showNotFoundMessage();
+        }
     }
 
-    private void delete(Employee employee){
-        employeeRepository.delete(employee);
-        search();
+    private void showNotFoundMessage() {
+        String notificationText = "Aranan sicile kayit bulunamadi";
+        Notification.show(notificationText, 5000, Notification.Position.MIDDLE)
+                .addThemeVariants(NotificationVariant.LUMO_CONTRAST);
     }
 
-    private void addSearchResultSection(List<Employee> employees) {
-        addSection(new EmployeesPmo(employees, this::delete));
+    private void delete(Entry entry){
+        entryRepository.delete(entry);
+    }
+
+    private Employee saveEmployee(Employee employee) {
+        return employeeRepository.save(employee);
+    }
+
+    private Entry saveEntry(Entry entry) {
+        Entry saved = entryRepository.save(entry);
+        removeAll();
+        createContent();
+        add(ComponentFactory.newHorizontalLine());
+        entry.getEmployee().getEntries().add(entry);
+        addSearchResultSection(entry.getEmployee());
+        return saved;
+    }
+
+    private void addSearchResultSection(Employee employee) {
+        addSection(new EmployeeInfoSectionPmo(employee, this::saveEntry));
+        addSection(new EntryTablePmo(employee.getEntries(), this::delete));
     }
 
 
